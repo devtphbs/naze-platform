@@ -4,6 +4,7 @@ import { FiSearch, FiBell, FiMenu, FiChevronLeft } from 'react-icons/fi';
 import { useStream } from '../context/StreamContext';
 import { useAuth } from '../context/AuthContext';
 import UserMenu from './UserMenu';
+import NotificationPopup from './NotificationPopup';
 
 export default function Layout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -54,7 +55,7 @@ function Topbar() {
       <div className="topbar-right">
         {isAuthenticated ? (
           <>
-            <button className="nz-btn-icon" title="Notifications"><FiBell /></button>
+            <NotificationPopup />
             <UserMenu />
           </>
         ) : (
