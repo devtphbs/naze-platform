@@ -11,6 +11,7 @@ import BrowsePage from './pages/BrowsePage';
 import ChannelPage from './pages/ChannelPage';
 import FollowingPage from './pages/FollowingPage';
 import SettingsPage from './pages/SettingsPage';
+import DashboardPage from './pages/DashboardPage';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -36,6 +37,14 @@ function AppRoutes() {
           element={
             <ProtectedRoute>
               <FollowingPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
             </ProtectedRoute>
           }
         />

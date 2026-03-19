@@ -17,7 +17,9 @@ export const StreamProvider = ({ children }) => {
         // Match stream keys to usernames using a simulated registry
         const registry = JSON.parse(localStorage.getItem('naze_user_registry') || '{}');
         const reversedRegistry = Object.fromEntries(
-          Object.entries(registry).map(([user, data]) => [data.streamKey, { user, ...data }])
+          Object.entries(registry)
+            .filter(([_, data]) => data && data.streamKey)
+            .map(([userName, data]) => [data.streamKey, { user: userName, ...data }])
         );
 
         const activeStreams = data.streams.map(s => {

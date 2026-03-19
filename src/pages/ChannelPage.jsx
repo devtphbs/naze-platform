@@ -36,19 +36,24 @@ export default function ChannelPage() {
   const channelData = liveStream ? {
     ...liveStream,
     displayName: streamerRegistryInfo.displayName || liveStream.username,
+    avatarUrl: streamerRegistryInfo.avatarUrl || liveStream.avatarUrl,
     merchLink: streamerRegistryInfo.merchLink || '',
     bio: streamerRegistryInfo.bio || `Welcome to ${id}'s channel!`,
+    themeColor: streamerRegistryInfo.themeColor || '#a855f7',
+    activeWidgets: streamerRegistryInfo.activeWidgets || [],
+    isLive: true
   } : {
     username: id,
     displayName: streamerRegistryInfo.displayName || id,
-    title: 'Offline',
-    category: 'Unknown',
+    avatarUrl: streamerRegistryInfo.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`,
     viewers: 0,
-    followers: 1337,
-    bio: streamerRegistryInfo.bio || `Welcome to ${id}'s channel!`,
+    category: 'Just Chatting',
+    title: 'Offline',
+    bio: streamerRegistryInfo.bio || `This streamer hasn't set a bio yet.`,
     merchLink: streamerRegistryInfo.merchLink || '',
-    tags: ['Gaming', 'Chill'],
-    avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`
+    themeColor: streamerRegistryInfo.themeColor || '#a855f7',
+    activeWidgets: streamerRegistryInfo.activeWidgets || [],
+    isLive: false
   };
 
   // Apply theme color
@@ -86,16 +91,19 @@ export default function ChannelPage() {
         {/* Channel Info */}
         <div className="channel-info">
           <div className="channel-header">
-            <img src={channelData.avatarUrl} alt={channelData.displayName} className="channel-avatar-lg" />
+            <div style={{ position: 'relative' }}>
+              <img src={channelData.avatarUrl} alt={channelData.displayName} className="channel-avatar-lg" />
+              {channelData.isLive && <div className="live-tag">LIVE</div>}
+            </div>
             <div className="channel-details">
               <div className="channel-name">
                 {channelData.displayName || channelData.username}
-                {isLive && <FiCheckCircle className="verified" />}
+                {channelData.isLive && <FiCheckCircle className="verified" />}
               </div>
               <div className="channel-stream-title">{channelData.title}</div>
               <div className="channel-meta">
                 <span>{channelData.category}</span>
-                {isLive && (
+                {channelData.isLive && (
                   <>
                     <span>•</span>
                     <span style={{ color: 'var(--nz-red)' }}>{formatViewers(channelData.viewers)} viewers</span>

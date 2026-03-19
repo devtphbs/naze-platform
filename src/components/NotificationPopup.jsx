@@ -1,19 +1,19 @@
 import { useState, useRef } from 'react';
-import { FiBell, FiCheckCircle, FiInfo } from 'react-icons/fi';
+import { FiBell, FiCheckCircle, FiInfo, FiUser } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-
+import { useAuth } from '../context/AuthContext';
 export default function NotificationPopup() {
+  const { user, updateProfile } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef();
 
-  // Simulated notifications
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'live', user: 'NightOwl', text: 'is now LIVE!', time: '2m ago', active: true },
-    { id: 2, type: 'system', text: 'Your 2FA setup was successful.', time: '1h ago', active: false },
-    { id: 3, type: 'follow', user: 'Gamer123', text: 'followed you!', time: '3h ago', active: false },
-  ]);
-
+  const notifications = user?.notifications || [];
   const unreadCount = notifications.filter(n => n.active).length;
+
+  const markAllRead = () => {
+    const updated = notifications.map(n => ({ ...n, active: false }));
+    updateProfile({ notifications: updated });
+  };
 
   return (
     <div className="notif-wrapper" ref={ref}>
@@ -70,7 +70,7 @@ export default function NotificationPopup() {
               <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>Notifications</span>
               <button 
                 style={{ background: 'none', border: 'none', color: 'var(--nz-accent-light)', fontSize: '0.75rem', cursor: 'pointer' }}
-                onClick={() => setNotifications(notifications.map(n => ({ ...n, active: false })))}
+                onClick={markAllRead}
               >
                 Mark all as read
               </button>

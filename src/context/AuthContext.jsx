@@ -18,6 +18,8 @@ const DEFAULT_USER = {
   merchLink: '',
   themeColor: '#a855f7',
   activeWidgets: [],
+  avatarUrl: '',
+  notifications: [],
 };
 
 export function AuthProvider({ children }) {
@@ -155,12 +157,36 @@ export function AuthProvider({ children }) {
     return updated.twoFAEnabled;
   };
 
+  const addNotification = (type, text, sender = '') => {
+    if (!user) return;
+    const newNotif = {
+      id: Date.now(),
+      type,
+      text,
+      user: sender,
+      time: 'Just now',
+      active: true
+    };
+    const updatedUser = {
+      ...user,
+      notifications: [newNotif, ...(user.notifications || [])].slice(0, 20)
+    };
+    persist(updatedUser);
+  };
+
   const toggleFollow = (streamerId) => {
     const following = user.following || [];
-    const updated = following.includes(streamerId)
-      ? following.filter((id) => id !== streamerId)
-      : [...following, streamerId];
+    const isNowFollowing = !following.includes(streamerId);
+    
+    const updated = isNowFollowing
+      ? [...following, streamerId]
+      : following.filter((id) => id !== streamerId);
+    
     updateProfile({ following: updated });
+
+    if (isNowFollowing) {
+      addNotification('follow', `You followed ${streamerId}!`, streamerId);
+    }
   };
 
   const isFollowing = (streamerId) => {
@@ -180,6 +206,7 @@ export function AuthProvider({ children }) {
         toggle2FA,
         toggleFollow,
         isFollowing,
+        addNotification,
         isAuthenticated: !!user,
       }}
     >

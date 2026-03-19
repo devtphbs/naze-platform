@@ -122,17 +122,47 @@ function ProfileSettings({ user, updateProfile }) {
     setTimeout(() => setSaved(false), 2000);
   };
 
+  const handleAvatarUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        if (img.width > 4000 || img.height > 4000) {
+          alert('Image too large! Maximum resolution is 4000x4000px.');
+          return;
+        }
+        updateProfile({ avatarUrl: event.target.result });
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+
   return (
     <>
       <h2>Profile</h2>
       <div className="settings-section">
-        <div className="avatar-editor">
-          <div className="avatar-preview" style={{ background: 'linear-gradient(135deg, var(--nz-accent), var(--nz-cyan))' }}>
-            {(displayName || 'U')[0].toUpperCase()}
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 24 }}>
+          {user.avatarUrl ? (
+            <img 
+              src={user.avatarUrl} 
+              alt="Avatar" 
+              style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', border: '2px solid var(--nz-accent)' }} 
+            />
+          ) : (
+            <div className="avatar-preview" style={{ width: 80, height: 80, borderRadius: '50%', background: 'linear-gradient(135deg, var(--nz-accent), var(--nz-cyan))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', fontWeight: 700 }}>
+              {(displayName || 'U')[0].toUpperCase()}
+            </div>
+          )}
           <div>
-            <button className="nz-btn nz-btn-secondary nz-btn-sm">Change Avatar</button>
-            <p style={{ fontSize: '0.75rem', color: 'var(--nz-text-dim)', marginTop: 6 }}>JPG, PNG or GIF. Max 2MB.</p>
+            <label className="nz-btn nz-btn-secondary nz-btn-sm" style={{ cursor: 'pointer' }}>
+              Upload New Avatar
+              <input type="file" hidden accept="image/*" onChange={handleAvatarUpload} />
+            </label>
+            <p style={{ fontSize: '0.7rem', color: 'var(--nz-text-dim)', marginTop: 8 }}>Max 4000x4000px. JPG, PNG, WebP.</p>
           </div>
         </div>
 
@@ -222,7 +252,9 @@ function SecuritySettings({ user, toggle2FA }) {
     }
   };
 
-  const otpAuthUrl = authenticator.keyuri(user.username, 'Naze', secret);
+  const otpAuthUrl = (secret && user?.username) 
+    ? authenticator.keyuri(user.username, 'Naze', secret)
+    : '';
 
   return (
     <>
