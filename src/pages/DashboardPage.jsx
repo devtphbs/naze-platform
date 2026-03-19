@@ -5,7 +5,39 @@ import { FiTrendingUp, FiUsers, FiActivity, FiZap, FiSettings, FiBarChart2, FiMe
 export default function DashboardPage() {
   const { user } = useAuth();
   const [streamHealth, setStreamHealth] = useState({ bitrate: 6500, fps: 60, dropped: 0 });
-  const [activeTab, setActiveTab] = useState('analytics');
+  
+  // Real-ish Analytics Data
+  const followerData = [
+    { day: 'Mon', value: 1150 },
+    { day: 'Tue', value: 1180 },
+    { day: 'Wed', value: 1170 },
+    { day: 'Thu', value: 1210 },
+    { day: 'Fri', value: 1235 },
+    { day: 'Sat', value: 1242 },
+    { day: 'Sun', value: 1248 },
+  ];
+
+  const maxVal = Math.max(...followerData.map(d => d.value));
+  const minVal = Math.min(...followerData.map(d => d.value)) - 20;
+  
+  const generatePath = () => {
+    const width = 800;
+    const height = 200;
+    const padding = 20;
+    const usableHeight = height - padding * 2;
+    const stepX = width / (followerData.length - 1);
+    
+    return followerData.map((d, i) => {
+      const x = i * stepX;
+      const y = height - padding - ((d.value - minVal) / (maxVal - minVal)) * usableHeight;
+      return i === 0 ? `M${x},${y}` : `L${x},${y}`;
+    }).join(' ');
+  };
+
+  const generateAreaPath = () => {
+    const path = generatePath();
+    return `${path} L800,200 L0,200 Z`;
+  };
 
   // Simulated live updates for health
   useEffect(() => {
@@ -34,7 +66,7 @@ export default function DashboardPage() {
 
       {/* Quick Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16, marginBottom: 32 }}>
-        <StatCard icon={<FiUsers />} label="Followers" value="1,248" trend="+12" color="var(--nz-purple)" />
+        <StatCard icon={<FiUsers />} label="Followers" value={followerData[6].value.toLocaleString()} trend="+12" color="var(--nz-purple)" />
         <StatCard icon={<FiActivity />} label="Current Viewers" value="152" trend="+5%" color="var(--nz-cyan)" />
         <StatCard icon={<FiZap />} label="Bitrate" value={`${streamHealth.bitrate} kbps`} trend="Stable" color="#10b981" />
         <StatCard icon={<FiActivity />} label="FPS" value={streamHealth.fps} trend="60" color="var(--nz-sky)" />
@@ -60,24 +92,35 @@ export default function DashboardPage() {
                 </linearGradient>
               </defs>
               <path 
-                d="M0,180 Q100,160 200,170 T400,140 T600,100 T800,80 L800,200 L0,200 Z" 
+                d={generateAreaPath()}
                 fill="url(#chartGradient)" 
               />
               <path 
-                d="M0,180 Q100,160 200,170 T400,140 T600,100 T800,80" 
+                d={generatePath()} 
                 fill="none" 
                 stroke="var(--nz-accent)" 
                 strokeWidth="3" 
                 className="chart-path"
               />
               {/* Data Points */}
-              <circle cx="200" cy="170" r="4" fill="var(--nz-accent)" />
-              <circle cx="400" cy="140" r="4" fill="var(--nz-accent)" />
-              <circle cx="600" cy="100" r="4" fill="var(--nz-accent)" />
-              <circle cx="800" cy="80" r="4" fill="var(--nz-accent)" />
+              {followerData.map((d, i) => {
+                const width = 800;
+                const height = 200;
+                const padding = 20;
+                const usableHeight = height - padding * 2;
+                const stepX = width / (followerData.length - 1);
+                const x = i * stepX;
+                const y = height - padding - ((d.value - minVal) / (maxVal - minVal)) * usableHeight;
+                return (
+                  <g key={i} className="chart-dot-group">
+                    <circle cx={x} cy={y} r="4" fill="var(--nz-accent)" />
+                    <text x={x} y={y - 10} textAnchor="middle" fill="var(--nz-text-dim)" fontSize="10">{d.value}</text>
+                  </g>
+                );
+              })}
             </svg>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 12, color: 'var(--nz-text-muted)', fontSize: '0.75rem' }}>
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              {followerData.map(d => <span key={d.day}>{d.day}</span>)}
             </div>
           </div>
         </div>
