@@ -72,7 +72,7 @@ function Sidebar({ collapsed, onToggle, streamers }) {
   const { isAuthenticated, user, isFollowing } = useAuth();
 
   const followedStreamers = isAuthenticated
-    ? streamers.filter((s) => isFollowing(s.id))
+    ? streamers.filter((s) => isFollowing(s.username))
     : [];
 
   const recommendedStreamers = streamers.filter(

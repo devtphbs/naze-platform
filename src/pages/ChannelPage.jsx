@@ -21,6 +21,7 @@ export default function ChannelPage() {
   
   const [isDonateOpen, setIsDonateOpen] = useState(false);
   const [isSubscribeOpen, setIsSubscribeOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'bounties' | 'about'
 
   // See if they are currently live
   const liveStream = liveStreams.find((s) => s.username.toLowerCase() === id.toLowerCase());
@@ -50,9 +51,31 @@ export default function ChannelPage() {
     avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`
   };
 
+  // Apply theme color
+  const themeStyles = {
+    '--nz-accent': streamerRegistryInfo.themeColor || '#a855f7',
+    '--nz-accent-glow': `${streamerRegistryInfo.themeColor || '#a855f7'}44`,
+    '--nz-accent-light': streamerRegistryInfo.themeColor || '#a855f7',
+  };
+
+  const activeWidgets = streamerRegistryInfo.activeWidgets || [];
+
   return (
-    <div className="channel-layout">
+    <div className="channel-layout animate-fade" style={themeStyles}>
       <div className="channel-main">
+        {/* Widgets Overlay (Optional) */}
+        {activeWidgets.includes('goal_bar') && (
+          <div className="channel-widget widget-goal-bar nz-glass border-glow" style={{ marginBottom: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 600, marginBottom: 6 }}>
+              <span>Follower Goal</span>
+              <span>1,245 / 1,500</span>
+            </div>
+            <div className="progress-bg" style={{ height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
+              <div className="progress-fill" style={{ width: '83%', height: '100%', background: 'var(--nz-accent)', boxShadow: '0 0 10px var(--nz-accent)' }} />
+            </div>
+          </div>
+        )}
+
         {/* Video Player */}
         <VideoPlayer 
           streamKey={channelData.username} 
@@ -136,42 +159,136 @@ export default function ChannelPage() {
             </button>
           </div>
 
-          {/* About */}
-          <div className="channel-about">
-            <h3>About {channelData.displayName || channelData.username}</h3>
-            <p>{channelData.bio}</p>
-            <div className="channel-stats">
-              <div className="channel-stat">
-                <div className="stat-val">{formatViewers(channelData.followers)}</div>
-                <div className="stat-label">Followers</div>
-              </div>
-              {isLive && (
-                <div className="channel-stat">
-                  <div className="stat-val">{formatViewers(channelData.viewers)}</div>
-                  <div className="stat-label">Viewers</div>
-                </div>
-              )}
-            </div>
+          {/* Tabs */}
+          <div className="channel-tabs" style={{ display: 'flex', gap: 24, borderBottom: '1px solid var(--nz-border)', marginBottom: 20, marginTop: 24 }}>
+            <button 
+              className={`channel-tab ${activeTab === 'home' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('home')}
+              style={{ padding: '8px 0', borderBottom: activeTab === 'home' ? '2px solid var(--nz-accent)' : 'none', background: 'none', color: activeTab === 'home' ? 'var(--nz-text)' : 'var(--nz-text-dim)', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Home
+            </button>
+            <button 
+              className={`channel-tab ${activeTab === 'bounties' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('bounties')}
+              style={{ padding: '8px 0', borderBottom: activeTab === 'bounties' ? '2px solid var(--nz-accent)' : 'none', background: 'none', color: activeTab === 'bounties' ? 'var(--nz-text)' : 'var(--nz-text-dim)', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Bounties
+            </button>
+            <button 
+              className={`channel-tab ${activeTab === 'about' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('about')}
+              style={{ padding: '8px 0', borderBottom: activeTab === 'about' ? '2px solid var(--nz-accent)' : 'none', background: 'none', color: activeTab === 'about' ? 'var(--nz-text)' : 'var(--nz-text-dim)', fontWeight: 600, cursor: 'pointer' }}
+            >
+              About
+            </button>
           </div>
 
-          {/* Recent Support Widget */}
-          <div className="support-widget nz-card" style={{ marginTop: 24, padding: 16 }}>
-            <h4 style={{ marginBottom: 12, fontSize: '0.9rem', color: 'var(--nz-accent-light)' }}>Recent Support</h4>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                <span style={{ color: 'var(--nz-text)' }}>Hildi</span>
-                <span style={{ color: 'var(--nz-cyan)' }}>Subscribed!</span>
+          {activeTab === 'home' && (
+            <>
+              {/* About Short */}
+              <div className="channel-about">
+                <h3>About {channelData.displayName || channelData.username}</h3>
+                <p>{channelData.bio}</p>
+                <div className="channel-stats">
+                  <div className="channel-stat">
+                    <div className="stat-val">{formatViewers(channelData.followers)}</div>
+                    <div className="stat-label">Followers</div>
+                  </div>
+                  {isLive && (
+                    <div className="channel-stat">
+                      <div className="stat-val">{formatViewers(channelData.viewers)}</div>
+                      <div className="stat-label">Viewers</div>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                <span style={{ color: 'var(--nz-text)' }}>Naze_Fan</span>
-                <span style={{ color: 'var(--nz-lightblue)' }}>Donated $10.00</span>
+            </>
+          )}
+
+          {activeTab === 'about' && (
+            <div className="channel-about-full animate-fade" style={{ padding: '10px 0' }}>
+               <h3 style={{ marginBottom: 12 }}>Detailed Bio</h3>
+               <p style={{ lineHeight: 1.6, color: 'var(--nz-text-muted)' }}>{channelData.bio || 'This streamer has not provided a detailed bio yet.'}</p>
+               <div style={{ marginTop: 24, padding: 20, background: 'var(--nz-bg-secondary)', borderRadius: 'var(--nz-radius-md)' }}>
+                  <h4 style={{ marginBottom: 8 }}>Channel Rules</h4>
+                  <ul style={{ fontSize: '0.85rem', color: 'var(--nz-text-muted)', paddingLeft: 20 }}>
+                    <li>Be respectful to others</li>
+                    <li>No spamming or self-promotion</li>
+                    <li>Have fun!</li>
+                  </ul>
+               </div>
+            </div>
+          )}
+
+          {activeTab === 'bounties' && (
+            <div className="channel-bounties-tab animate-fade">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+                <h3 style={{ fontSize: '1.2rem' }}>🎯 Active Channel Bounties</h3>
+                <button className="nz-btn nz-btn-secondary nz-btn-sm">Propose Bounty</button>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
-                <span style={{ color: 'var(--nz-text)' }}>Gamer123</span>
-                <span style={{ color: 'var(--nz-accent-light)' }}>Gifted 5 Subs!</span>
+              <div style={{ display: 'grid', gap: 16 }}>
+                <div className="bounty-card nz-card border-glow" style={{ padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--nz-accent-light)' }}>Win 3 games in a row</div>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--nz-text-muted)', marginTop: 4 }}>Currently attempted in: Valorant</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--nz-cyan)' }}>$50.00</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--nz-text-dim)' }}>Reward Pool</div>
+                  </div>
+                </div>
+                <div className="bounty-card nz-card border-glow" style={{ padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--nz-cyan)' }}>Use only a pistol this round</div>
+                    <p style={{ fontSize: '0.82rem', color: 'var(--nz-text-muted)', marginTop: 4 }}>Proposed by: Naze_Fan_#1</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 800, color: 'var(--nz-lightblue)' }}>50 Subs</div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--nz-text-dim)' }}>Reward Pool</div>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
+
+          {/* Recent Support Widget */}
+          {activeWidgets.includes('recent_support') && (
+            <div className="support-widget nz-card border-glow" style={{ marginTop: 24, padding: 16 }}>
+              <h4 style={{ marginBottom: 12, fontSize: '0.9rem', color: 'var(--nz-accent)' }}>Recent Support</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                  <span style={{ color: 'var(--nz-text)' }}>Hildi</span>
+                  <span style={{ color: 'var(--nz-cyan)' }}>Subscribed!</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                  <span style={{ color: 'var(--nz-text)' }}>Naze_Fan</span>
+                  <span style={{ color: 'var(--nz-lightblue)' }}>Donated $10.00</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem' }}>
+                  <span style={{ color: 'var(--nz-text)' }}>Gamer123</span>
+                  <span style={{ color: 'var(--nz-accent-light)' }}>Gifted 5 Subs!</span>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bounty Board */}
+          {activeWidgets.includes('bounty_board') && (
+            <div className="bounty-widget nz-card border-glow" style={{ marginTop: 24, padding: 16 }}>
+              <h4 style={{ marginBottom: 12, fontSize: '0.9rem', color: 'var(--nz-accent)' }}>Active Bounties</h4>
+              <div style={{ display: 'grid', gap: 10 }}>
+                <div className="bounty-item" style={{ padding: '8px 12px', background: 'var(--nz-bg-tertiary)', borderRadius: 'var(--nz-radius-sm)', borderLeft: '3px solid var(--nz-accent)' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Win 3 games in a row</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--nz-text-muted)' }}>Reward: $50.00 Bounty</div>
+                </div>
+                <div className="bounty-item" style={{ padding: '8px 12px', background: 'var(--nz-bg-tertiary)', borderRadius: 'var(--nz-radius-sm)', borderLeft: '3px solid var(--nz-cyan)' }}>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>Use only a pistol this round</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--nz-text-muted)' }}>Reward: 50 Gifted Subs</div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

@@ -2,6 +2,7 @@ import { useAuth } from '../context/AuthContext';
 import { useStripeSettings } from '../context/StripeContext';
 import { QRCodeSVG } from 'qrcode.react';
 import * as otplib from 'otplib';
+import { FiUser, FiShield, FiBell, FiKey, FiLogOut, FiLayout, FiGrid } from 'react-icons/fi';
 const { authenticator } = otplib;
 
 export default function SettingsPage() {
@@ -21,6 +22,8 @@ export default function SettingsPage() {
   const tabs = [
     { id: 'profile', label: 'Profile', icon: <FiUser /> },
     { id: 'security', label: 'Security', icon: <FiShield /> },
+    { id: 'personalization', label: 'Channel Theme', icon: <FiLayout /> },
+    { id: 'widgets', label: 'Stream Widgets', icon: <FiGrid /> },
     { id: 'payments', label: 'Payments', icon: <FiKey /> },
     { id: 'notifications', label: 'Notifications', icon: <FiBell /> },
     { id: 'stream', label: 'Stream Key', icon: <FiKey /> },
@@ -53,6 +56,8 @@ export default function SettingsPage() {
         <div className="settings-panel">
           {activeTab === 'profile' && <ProfileSettings user={user} updateProfile={updateProfile} />}
           {activeTab === 'security' && <SecuritySettings user={user} toggle2FA={toggle2FA} />}
+          {activeTab === 'personalization' && <PersonalizationSettings user={user} updateProfile={updateProfile} />}
+          {activeTab === 'widgets' && <WidgetSettings user={user} updateProfile={updateProfile} />}
           {activeTab === 'payments' && <PaymentSettings />}
           {activeTab === 'notifications' && <NotificationSettings />}
           {activeTab === 'stream' && <StreamKeySettings user={user} />}
@@ -405,6 +410,126 @@ function StreamKeySettings({ user }) {
       <div className="settings-section">
         <h3>Server URL</h3>
         <input className="nz-input" value="rtmp://localhost:1935/live" readOnly style={{ maxWidth: 400, fontFamily: 'monospace', fontSize: '0.82rem' }} />
+      </div>
+    </>
+  );
+}
+function PersonalizationSettings({ user, updateProfile }) {
+  const [themeColor, setThemeColor] = useState(user.themeColor || '#a855f7');
+  const [saved, setSaved] = useState(false);
+
+  const colors = [
+    '#a855f7', // Purple
+    '#06b6d4', // Cyan
+    '#0ea5e9', // Blue
+    '#facc15', // Yellow
+    '#ef4444', // Red
+    '#10b981', // Green
+  ];
+
+  const handleSave = () => {
+    updateProfile({ themeColor });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <>
+      <h2>Channel Personalization</h2>
+      <div className="settings-section">
+        <p style={{ fontSize: '0.85rem', color: 'var(--nz-text-muted)', marginBottom: 20 }}>
+          Choose a primary accent color for your channel page to stand out.
+        </p>
+
+        <div style={{ display: 'flex', gap: 12, marginBottom: 24, flexWrap: 'wrap' }}>
+          {colors.map(color => (
+            <div
+              key={color}
+              onClick={() => setThemeColor(color)}
+              style={{
+                width: 44, height: 44, borderRadius: '50%',
+                backgroundColor: color, cursor: 'pointer',
+                border: themeColor === color ? '3px solid #fff' : 'none',
+                boxShadow: themeColor === color ? `0 0 15px ${color}` : 'none',
+                transition: 'all 0.2s'
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="form-group" style={{ marginBottom: 20 }}>
+          <label className="nz-label">Custom HEX Color</label>
+          <div style={{ display: 'flex', gap: 12 }}>
+            <input
+              className="nz-input"
+              type="text"
+              value={themeColor}
+              onChange={(e) => setThemeColor(e.target.value)}
+              style={{ maxWidth: 120, textAlign: 'center' }}
+            />
+            <div style={{ width: 44, height: 44, borderRadius: 'var(--nz-radius-sm)', backgroundColor: themeColor, border: '1px solid var(--nz-border)' }} />
+          </div>
+        </div>
+
+        <button className="nz-btn nz-btn-primary" onClick={handleSave}>
+          {saved ? '✓ Theme Saved!' : 'Save Personalization'}
+        </button>
+      </div>
+    </>
+  );
+}
+
+function WidgetSettings({ user, updateProfile }) {
+  const [activeWidgets, setActiveWidgets] = useState(user.activeWidgets || []);
+  const [saved, setSaved] = useState(false);
+
+  const widgets = [
+    { id: 'goal_bar', label: 'Follower Goal Bar', desc: 'Show your progress towards a follower milestone.' },
+    { id: 'recent_support', label: 'Recent Support Ticker', desc: 'Display a rotating list of recent tips and subs.' },
+    { id: 'bounty_board', label: 'Live Bounty Board', desc: 'Allow viewers to see active challenges you are doing.' },
+  ];
+
+  const toggleWidget = (id) => {
+    const updated = activeWidgets.includes(id)
+      ? activeWidgets.filter(w => w !== id)
+      : [...activeWidgets, id];
+    setActiveWidgets(updated);
+  };
+
+  const handleSave = () => {
+    updateProfile({ activeWidgets });
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  return (
+    <>
+      <h2>Stream Widgets</h2>
+      <div className="settings-section">
+        <p style={{ fontSize: '0.85rem', color: 'var(--nz-text-muted)', marginBottom: 20 }}>
+          Enable interactive overlays and widgets to engage your viewers directly on your channel page.
+        </p>
+
+        <div style={{ display: 'grid', gap: 16 }}>
+          {widgets.map(w => {
+            const isActive = activeWidgets.includes(w.id);
+            return (
+              <div key={w.id} className="settings-row" style={{ padding: '16px', border: '1px solid var(--nz-border)', borderRadius: 'var(--nz-radius-sm)' }}>
+                <div className="row-info">
+                  <div className="row-label">{w.label}</div>
+                  <div className="row-desc">{w.desc}</div>
+                </div>
+                <div className={`toggle-switch ${isActive ? 'active' : ''}`} onClick={() => toggleWidget(w.id)}>
+                  <div className="toggle-knob" />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <button className="nz-btn nz-btn-primary" onClick={handleSave} style={{ marginTop: 24 }}>
+          {saved ? '✓ Settings Saved!' : 'Save Widget Config'}
+        </button>
       </div>
     </>
   );

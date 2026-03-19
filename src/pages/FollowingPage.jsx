@@ -57,7 +57,7 @@ export default function FollowingPage() {
             </>
           )}
 
-          {offline.length > 0 && (
+          {offlineIds.length > 0 && (
             <>
               <h2 style={{ fontSize: '1rem', color: 'var(--nz-text-muted)', marginBottom: 12 }}>
                 Offline ({offlineIds.length})

@@ -16,6 +16,8 @@ const DEFAULT_USER = {
   streamKey: '',
   following: [],
   merchLink: '',
+  themeColor: '#a855f7',
+  activeWidgets: [],
 };
 
 export function AuthProvider({ children }) {
@@ -40,7 +42,15 @@ export function AuthProvider({ children }) {
       localStorage.setItem('naze_user', JSON.stringify(u));
       // Update global registry
       const registry = JSON.parse(localStorage.getItem('naze_user_registry') || '{}');
-      registry[u.username] = { streamKey: u.streamKey, displayName: u.displayName, category: u.category || 'Just Chatting', title: u.title || '' };
+      registry[u.username] = { 
+        streamKey: u.streamKey, 
+        displayName: u.displayName, 
+        category: u.category || 'Just Chatting', 
+        title: u.title || '',
+        themeColor: u.themeColor || '#a855f7',
+        activeWidgets: u.activeWidgets || [],
+        merchLink: u.merchLink || ''
+      };
       localStorage.setItem('naze_user_registry', JSON.stringify(registry));
     } else {
       localStorage.removeItem('naze_user');
@@ -56,6 +66,15 @@ export function AuthProvider({ children }) {
 
     if (age < 13) {
       return { success: false, error: 'You must be at least 13 years old to register on Naze.' };
+    }
+
+    const registry = JSON.parse(localStorage.getItem('naze_user_registry') || '{}');
+    if (registry[username]) {
+      return { success: false, error: 'Username already taken.' };
+    }
+    const emailExists = Object.values(registry).some(u => u.email === email);
+    if (emailExists) {
+      return { success: false, error: 'Email already registered.' };
     }
 
     const newUser = {
