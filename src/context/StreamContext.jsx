@@ -32,7 +32,8 @@ export const StreamProvider = ({ children }) => {
             category: userInfo.category || 'Just Chatting',
             viewers: Math.floor(Math.random() * 100) + 1, // Simulated viewer count
             avatarUrl: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userInfo.user}`,
-            startTime: s.startTime
+            startTime: s.startTime,
+            stats: s.stats || { bitrate: 0, fps: 0 }
           };
         });
         

@@ -12,6 +12,7 @@ import ChannelPage from './pages/ChannelPage';
 import FollowingPage from './pages/FollowingPage';
 import SettingsPage from './pages/SettingsPage';
 import DashboardPage from './pages/DashboardPage';
+import WidgetOverlayPage from './pages/WidgetOverlayPage';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -26,6 +27,9 @@ function AppRoutes() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignUpPage />} />
       <Route path="/2fa" element={<TwoFactorPage />} />
+
+      {/* Widget Overlay (no layout, transparent) */}
+      <Route path="/widgets/:type" element={<WidgetOverlayPage />} />
 
       {/* Main layout routes */}
       <Route element={<Layout />}>

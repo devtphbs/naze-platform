@@ -16,10 +16,20 @@ app.get('/api/streams', (req, res) => {
       // Get the stream key (e.g., 'live/user123' -> 'user123')
       const streamKey = session.streamPath.split('/').pop();
       if (streamKey) {
+        // Calculate bitrate from byte count if needed, or use session stats
+        // NodeMediaServer sessions have bitrates in session.publisher?
+        const stats = session.publisher ? {
+          bitrate: Math.floor(session.publisher.bitrate || 0),
+          fps: Math.round(session.publisher.fps || 0),
+          width: session.publisher.width,
+          height: session.publisher.height,
+        } : { bitrate: 0, fps: 0 };
+
         activeStreams.push({
           streamKey,
           id: session.id,
-          startTime: session.connectTime
+          startTime: session.connectTime,
+          stats
         });
       }
     }
